@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pembuat Gambar dengan Teks Overlay</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #f1f1f1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(to right, #0f3460, #1a1a2e);
+            color: white;
+            text-align: center;
+            padding: 25px 20px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #4cc9f0;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+        
+        .content {
+            display: flex;
+            padding: 30px;
+            gap: 30px;
+        }
+        
+        .input-section {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .preview-section {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            color: #4cc9f0;
+        }
+        
+        .input-title {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            font-size: 1rem;
+            resize: vertical;
+            background: rgba(255, 255, 255, 0.05);
+            color: #f1f1f1;
+        }
+        
+        textarea#judulInput {
+            height: 60px;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #4361ee;
+        }
+        
+        .file-input-container {
+            margin-bottom: 10px;
+        }
+        
+        .file-input-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #4361ee;
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .file-input-btn:hover {
+            background: #3a56d4;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-name {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        
+        .size-control {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .size-control label {
+            margin-bottom: 8px;
+        }
+        
+        .size-control input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+        
+        .btn-kirim {
+            width: 100%;
+            padding: 18px;
+            background: #f72585;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .btn-kirim:hover {
+            background: #e01a75;
+        }
+        
+        .preview-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        #resultCanvas {
+            width: 100%;
+            display: block;
+        }
+        
+        .preview-placeholder {
+            width: 100%;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.1);
+            color: #888;
+        }
+        
+        .btn-download {
+            padding: 15px 30px;
+            background: #4cc9f0;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: none;
+        }
+        
+        .btn-download:hover {
+            background: #3ab8df;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        @media (max-width: 900px) {
+            .content {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Pembuat Gambar dengan Teks Overlay</h1>
+            <p class="subtitle">Upload gambar + teks judul & deskripsi = gambar dengan overlay teks</p>
+        </header>
+        
+        <div class="content">
+            <div class="input-section">
+                <div class="form-group">
+                    <div class="input-title">Judul (background hitam, teks putih - ukuran 18px):</div>
+                    <textarea id="judulInput" placeholder="Masukkan judul di sini..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <div class="input-title">Deskripsi (background putih, teks hitam - ukuran bisa diatur):</div>
+                    <textarea id="deskripsiInput" placeholder="Masukkan deskripsi di sini..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="imageUpload">Upload Gambar:</label>
+                    <div class="file-input-container">
+                        <label class="file-input-btn" for="imageUpload">Pilih Gambar</label>
+                        <input type="file" id="imageUpload" class="file-input" accept="image/*">
+                    </div>
+                    <div class="file-name" id="fileName">Belum ada file dipilih</div>
+                </div>
+                
+                <div class="size-control">
+                    <label for="textSize">Ukuran Teks Deskripsi (px):</label>
+                    <input type="number" id="textSize" min="10" max="100" value="18">
+                </div>
+                
+                <button class="btn-kirim" id="submitBtn">Buat Gambar dengan Teks</button>
+            </div>
+            
+            <div class="preview-section">
+                <div class="preview-container">
+                    <div class="preview-placeholder" id="placeholder">
+                        <div style="font-size: 3rem; margin-bottom: 15px;">📷</div>
+                        <p>Hasil akan muncul di sini</p>
+                    </div>
+                    <canvas id="resultCanvas" style="display: none;"></canvas>
+                </div>
+                
+                <button class="btn-download" id="downloadBtn">Download Gambar</button>
+            </div>
+        </div>
+        
+        <footer>
+            <p style="text-align: center; color: #666; font-size: 0.9rem;">
+                ©<script>document.write(new Date().getFullYear())</script> 
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Elemen DOM
+        const judulInput = document.getElementById('judulInput');
+        const deskripsiInput = document.getElementById('deskripsiInput');
+        const imageUpload = document.getElementById('imageUpload');
+        const textSize = document.getElementById('textSize');
+        const submitBtn = document.getElementById('submitBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const fileName = document.getElementById('fileName');
+        const resultCanvas = document.getElementById('resultCanvas');
+        const placeholder = document.getElementById('placeholder');
+        
+        // Variabel untuk menyimpan gambar hasil
+        let generatedImage = null;
+        
+        // Update nama file yang dipilih
+        imageUpload.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                fileName.textContent = this.files[0].name;
+                fileName.style.color = '#4cc9f0';
+            } else {
+                fileName.textContent = 'Belum ada file dipilih';
+                fileName.style.color = '#aaa';
+            }
+        });
+        
+        // Fungsi untuk membuat gambar dengan teks overlay
+        submitBtn.addEventListener('click', function() {
+            const judul = judulInput.value.trim();
+            const deskripsi = deskripsiInput.value.trim();
+            const imageFile = imageUpload.files[0];
+            const fontSize = parseInt(textSize.value) || 18;
+            
+            if (!deskripsi) {
+                alert('Silakan masukkan deskripsi terlebih dahulu!');
+                deskripsiInput.focus();
+                return;
+            }
+            
+            if (!imageFile) {
+                alert('Silakan pilih gambar terlebih dahulu!');
+                return;
+            }
+            
+            // Tampilkan loading
+            submitBtn.textContent = 'Memproses...';
+            submitBtn.disabled = true;
+            
+            // Buat gambar dengan teks overlay
+            createImageWithTextOverlay(imageFile, judul, deskripsi, fontSize);
+        });
+        
+        // Fungsi untuk wrap teks dengan justify
+        function drawJustifiedText(ctx, text, x, y, width, fontSize) {
+            const words = text.split(' ');
+            let line = '';
+            let lineHeight = fontSize * 1.4;
+            let currentY = y;
+            
+            for (let i = 0; i < words.length; i++) {
+                const testLine = line + words[i] + ' ';
+                const metrics = ctx.measureText(testLine);
+                
+                if (metrics.width > width && i > 0) {
+                    // Gambar baris dengan justify
+                    drawJustifiedLine(ctx, line.trim(), x, currentY, width);
+                    line = words[i] + ' ';
+                    currentY += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            
+            // Gambar baris terakhir (rata kiri)
+            ctx.fillText(line.trim(), x, currentY);
+        }
+        
+        // Fungsi untuk menggambar satu baris dengan justify
+        function drawJustifiedLine(ctx, text, x, y, width) {
+            const words = text.split(' ');
+            
+            if (words.length === 1) {
+                ctx.fillText(text, x, y);
+                return;
+            }
+            
+            // Hitung lebar teks tanpa spasi
+            let textWidth = 0;
+            for (let word of words) {
+                textWidth += ctx.measureText(word).width;
+            }
+            
+            // Hitung spasi yang dibutuhkan
+            const totalSpacing = width - textWidth;
+            const spaceWidth = totalSpacing / (words.length - 1);
+            
+            // Gambar setiap kata dengan spasi yang disesuaikan
+            let currentX = x;
+            for (let i = 0; i < words.length; i++) {
+                ctx.fillText(words[i], currentX, y);
+                currentX += ctx.measureText(words[i]).width + spaceWidth;
+            }
+        }
+        
+        // Fungsi untuk membuat gambar dengan teks overlay di bagian bawah
+        function createImageWithTextOverlay(imageFile, judul, deskripsi, fontSize) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const img = new Image();
+                
+                img.onload = function() {
+                    // Atur ukuran canvas sesuai dengan gambar
+                    resultCanvas.width = img.width;
+                    resultCanvas.height = img.height;
+                    
+                    const ctx = resultCanvas.getContext('2d');
+                    
+                    // Gambar gambar asli ke canvas
+                    ctx.drawImage(img, 0, 0, img.width, img.height);
+                    
+                    // OVERLAY PUTIH DI PERBESAR: 35% (dari 30%)
+                    const overlayHeight = img.height * 0.35;
+                    const overlayY = img.height - overlayHeight;
+                    
+                    // Gambar overlay putih untuk deskripsi
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(0, overlayY, img.width, overlayHeight);
+                    
+                    // Garis pemisah di atas overlay
+                    ctx.fillStyle = '#4361ee';
+                    ctx.fillRect(0, overlayY, img.width, 3);
+                    
+                    // OVERLAY JUDUL (mentok kiri, 50% di gambar, 50% di overlay putih)
+                    if (judul) {
+                        // Ukuran teks judul tetap 18px
+                        const judulFontSize = 18;
+                        
+                        // Ukuran font untuk judul
+                        ctx.font = `bold ${judulFontSize}px Arial`;
+                        
+                        // PADDING DIPERBESAR: kiri kanan 20px, atas bawah 15px (dari 12px & 8px)
+                        const judulPaddingLR = 20;
+                        const judulPaddingTB = 15;
+                        const judulTextWidth = ctx.measureText(judul).width;
+                        const judulBoxHeight = judulFontSize + (judulPaddingTB * 2);
+                        
+                        // Posisi Y: tepat di batas antara gambar dan overlay putih
+                        const judulY = overlayY;
+                        
+                        // POSISI X: MENTOK KIRI (0px)
+                        const judulX = 0;
+                        
+                        // Gambar overlay hitam untuk judul (hanya seukuran teks + padding)
+                        // 50% di atas garis, 50% di bawah garis
+                        const halfHeight = judulBoxHeight / 2;
+                        
+                        ctx.fillStyle = 'black';
+                        ctx.fillRect(
+                            judulX, // MENTOK KIRI
+                            judulY - halfHeight, // Mulai dari setengah tinggi di atas garis
+                            judulTextWidth + (judulPaddingLR * 2), 
+                            judulBoxHeight
+                        );
+                        
+                        // Teks judul (putih) - di tengah vertikal overlay hitam
+                        ctx.fillStyle = 'white';
+                        ctx.textBaseline = 'middle';
+                        ctx.textAlign = 'left';
+                        
+                        const judulTextX = judulX + judulPaddingLR; // MENTOK KIRI + padding
+                        const judulTextY = judulY; // Tepat di tengad overlay hitam
+                        
+                        ctx.fillText(judul, judulTextX, judulTextY);
+                    }
+                    
+                    // TEKS DESKRIPSI
+                    ctx.fillStyle = 'black';
+                    ctx.font = `bold ${fontSize}px Arial`;
+                    ctx.textBaseline = 'top';
+                    ctx.textAlign = 'left';
+                    
+                    // Padding untuk teks deskripsi
+                    const paddingLeftRight = 25;
+                    const paddingTop = 45; // Tetap agak besar karena overlay putih lebih tinggi
+                    const textX = paddingLeftRight;
+                    const textY = overlayY + paddingTop;
+                    const maxWidth = img.width - (paddingLeftRight * 2);
+                    
+                    // Gambar teks deskripsi dengan justify dan multiple lines
+                    const lines = deskripsi.split('\n');
+                    let currentY = textY;
+                    
+                    for (let line of lines) {
+                        if (line.trim() === '') continue;
+                        
+                        drawJustifiedText(ctx, line.trim(), textX, currentY, maxWidth, fontSize);
+                        currentY += fontSize * 1.6;
+                        
+                        // Cek apakah masih dalam area overlay
+                        if (currentY > overlayY + overlayHeight - paddingLeftRight) {
+                            break;
+                        }
+                    }
+                    
+                    // Tampilkan canvas dan sembunyikan placeholder
+                    resultCanvas.style.display = 'block';
+                    placeholder.style.display = 'none';
+                    
+                    // Simpan gambar untuk diunduh nanti
+                    generatedImage = resultCanvas.toDataURL('image/png');
+                    
+                    // Tampilkan tombol unduh
+                    downloadBtn.style.display = 'block';
+                    
+                    // Kembalikan tombol ke keadaan semula
+                    submitBtn.textContent = 'Buat Gambar dengan Teks';
+                    submitBtn.disabled = false;
+                };
+                
+                img.src = e.target.result;
+            };
+            
+            reader.readAsDataURL(imageFile);
+        }
+        
+        // Fungsi untuk mengunduh gambar
+        downloadBtn.addEventListener('click', function() {
+            if (!generatedImage) {
+                alert('Tidak ada gambar untuk diunduh. Silakan buat gambar terlebih dahulu.');
+                return;
+            }
+            
+            // Buat tautan unduhan
+            const link = document.createElement('a');
+            link.download = 'gambar-dengan-teks.png';
+            link.href = generatedImage;
+            link.click();
+        });
+    </script>
+</body>
+</html> 
