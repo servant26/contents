@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pembuat Gambar dengan Teks Overlay</title>
+    <title>Multi-Point Image Generator with Text Overlay</title>
     <style>
         * {
             margin: 0;
@@ -20,7 +20,7 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background-color: rgba(255, 255, 255, 0.1);
             border-radius: 15px;
@@ -57,16 +57,16 @@
             padding: 20px;
         }
         
-        .preview-section {
+        .output-section {
             flex: 1;
             padding: 20px;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            gap: 20px;
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         
         label {
@@ -85,7 +85,7 @@
         
         textarea {
             width: 100%;
-            height: 100px;
+            height: 150px;
             padding: 15px;
             border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 10px;
@@ -93,15 +93,54 @@
             resize: vertical;
             background: rgba(255, 255, 255, 0.05);
             color: #f1f1f1;
+            line-height: 1.5;
         }
         
-        textarea#judulInput {
-            height: 60px;
+        .multi-input-hint {
+            background: rgba(76, 201, 240, 0.1);
+            border-left: 4px solid #4cc9f0;
+            padding: 10px 15px;
+            margin: 15px 0;
+            border-radius: 5px;
         }
         
-        textarea:focus {
-            outline: none;
-            border-color: #4361ee;
+        .multi-input-hint ul {
+            margin-left: 20px;
+            margin-top: 5px;
+        }
+        
+        .multi-input-hint li {
+            margin-bottom: 5px;
+        }
+        
+        .point-indicator {
+            background: rgba(67, 97, 238, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .point-number {
+            font-weight: bold;
+            color: #4cc9f0;
+            font-size: 1.2rem;
+        }
+        
+        .image-input-group {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .image-input-group h3 {
+            color: #f72585;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
         }
         
         .file-input-container {
@@ -111,15 +150,16 @@
         .file-input-btn {
             display: block;
             width: 100%;
-            padding: 15px;
+            padding: 12px;
             background: #4361ee;
             color: white;
             text-align: center;
-            border-radius: 10px;
+            border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             border: none;
+            font-size: 0.95rem;
         }
         
         .file-input-btn:hover {
@@ -133,32 +173,19 @@
         .file-name {
             font-size: 0.9rem;
             color: #aaa;
+            margin-top: 5px;
+            min-height: 20px;
         }
         
-        .size-control {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
         }
         
-        .size-control label {
-            margin-bottom: 8px;
-        }
-        
-        .size-control input {
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-        }
-        
-        .btn-kirim {
-            width: 100%;
+        .btn-kirim, .btn-download-all {
+            flex: 1;
             padding: 18px;
-            background: #f72585;
             color: white;
             border: none;
             border-radius: 10px;
@@ -166,53 +193,104 @@
             font-size: 1.1rem;
             cursor: pointer;
             transition: all 0.3s;
-            margin-top: 10px;
+        }
+        
+        .btn-kirim {
+            background: #f72585;
         }
         
         .btn-kirim:hover {
             background: #e01a75;
         }
         
-        .preview-container {
-            width: 100%;
-            max-width: 500px;
-            background-color: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        #resultCanvas {
-            width: 100%;
-            display: block;
-        }
-        
-        .preview-placeholder {
-            width: 100%;
-            height: 300px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.1);
-            color: #888;
-        }
-        
-        .btn-download {
-            padding: 15px 30px;
+        .btn-download-all {
             background: #4cc9f0;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
             display: none;
         }
         
-        .btn-download:hover {
+        .btn-download-all:hover {
             background: #3ab8df;
+        }
+        
+        .preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .image-card {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s;
+        }
+        
+        .image-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            font-weight: bold;
+            color: #4cc9f0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .card-actions {
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-download-single {
+            flex: 1;
+            padding: 10px;
+            background: #4361ee;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .btn-download-single:hover {
+            background: #3a56d4;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #4cc9f0, #4361ee);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .status-message {
+            text-align: center;
+            padding: 10px;
+            background: rgba(76, 201, 240, 0.1);
+            border-radius: 8px;
+            margin: 10px 0;
+            display: none;
         }
         
         footer {
@@ -222,8 +300,22 @@
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
             .content {
+                flex-direction: column;
+            }
+            
+            .preview-container {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .preview-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
                 flex-direction: column;
             }
         }
@@ -232,112 +324,169 @@
 <body>
     <div class="container">
         <header>
-            <h1>Pembuat Gambar dengan Teks Overlay</h1>
-            <p class="subtitle">Upload gambar + teks judul & deskripsi = gambar dengan overlay teks</p>
+            <h1>Multi-Point Image Generator</h1>
+            <p class="subtitle">Input multiple points with descriptions and images → Generate Instagram-ready images (1080x1350)</p>
         </header>
         
         <div class="content">
             <div class="input-section">
                 <div class="form-group">
-                    <div class="input-title">Judul (background hitam, teks putih - ukuran 18px):</div>
-                    <textarea id="judulInput" placeholder="Masukkan judul di sini..."></textarea>
+                    <label for="multiInput">Input Poin (Format: Number. Title + Description):</label>
+                    <textarea id="multiInput" placeholder="Isi deskripsi"></textarea>
                 </div>
                 
-                <div class="form-group">
-                    <div class="input-title">Deskripsi (background putih, teks hitam - ukuran bisa diatur):</div>
-                    <textarea id="deskripsiInput" placeholder="Masukkan deskripsi di sini..."></textarea>
+                <div id="imageInputsContainer">
+                    <!-- Dynamic image inputs will be generated here -->
                 </div>
                 
-                <div class="form-group">
-                    <label for="imageUpload">Upload Gambar:</label>
-                    <div class="file-input-container">
-                        <label class="file-input-btn" for="imageUpload">Pilih Gambar</label>
-                        <input type="file" id="imageUpload" class="file-input" accept="image/*">
-                    </div>
-                    <div class="file-name" id="fileName">Belum ada file dipilih</div>
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
                 </div>
                 
-                <div class="size-control">
-                    <label for="textSize">Ukuran Teks Deskripsi (px):</label>
-                    <input type="number" id="textSize" min="10" max="100" value="18">
-                </div>
+                <div class="status-message" id="statusMessage"></div>
                 
-                <button class="btn-kirim" id="submitBtn">Buat Gambar dengan Teks</button>
+                <div class="controls">
+                    <button class="btn-kirim" id="submitBtn">Generate All Images</button>
+                    <button class="btn-download-all" id="downloadAllBtn">Download All Images (ZIP)</button>
+                </div>
             </div>
             
-            <div class="preview-section">
-                <div class="preview-container">
-                    <div class="preview-placeholder" id="placeholder">
-                        <div style="font-size: 3rem; margin-bottom: 15px;">📷</div>
-                        <p>Hasil akan muncul di sini</p>
+            <div class="output-section">
+                <h2>Preview Images</h2>
+                <div class="preview-container" id="previewContainer">
+                    <div class="image-card placeholder">
+                        <div class="card-header">No images generated yet</div>
+                        <div style="padding: 50px; text-align: center; color: #888;">
+                            <div style="font-size: 3rem; margin-bottom: 15px;">🖼️</div>
+                            <p>Generated images will appear here</p>
+                            <p style="font-size: 0.9rem; margin-top: 10px;">Each image: 1080x1350 (Instagram 4:5)</p>
+                        </div>
                     </div>
-                    <canvas id="resultCanvas" style="display: none;"></canvas>
                 </div>
-                
-                <button class="btn-download" id="downloadBtn">Download Gambar</button>
             </div>
         </div>
         
         <footer>
-            <p style="text-align: center; color: #666; font-size: 0.9rem;">
-                ©<script>document.write(new Date().getFullYear())</script> 
-            </p>
+            <p>Automatic Image Generator for Multiple Points | Instagram Feed Size: 1080x1350px | Format: Title (black bg) + Description (white bg)</p>
         </footer>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    
     <script>
-        // Elemen DOM
-        const judulInput = document.getElementById('judulInput');
-        const deskripsiInput = document.getElementById('deskripsiInput');
-        const imageUpload = document.getElementById('imageUpload');
-        const textSize = document.getElementById('textSize');
+        // DOM Elements
+        const multiInput = document.getElementById('multiInput');
+        const imageInputsContainer = document.getElementById('imageInputsContainer');
+        const previewContainer = document.getElementById('previewContainer');
         const submitBtn = document.getElementById('submitBtn');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const fileName = document.getElementById('fileName');
-        const resultCanvas = document.getElementById('resultCanvas');
-        const placeholder = document.getElementById('placeholder');
+        const downloadAllBtn = document.getElementById('downloadAllBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const statusMessage = document.getElementById('statusMessage');
         
-        // Variabel untuk menyimpan gambar hasil
-        let generatedImage = null;
+        // Fixed Instagram size
+        const FIXED_WIDTH = 1080;
+        const FIXED_HEIGHT = 1350;
         
-        // Update nama file yang dipilih
-        imageUpload.addEventListener('change', function() {
-            if (this.files && this.files[0]) {
-                fileName.textContent = this.files[0].name;
-                fileName.style.color = '#4cc9f0';
-            } else {
-                fileName.textContent = 'Belum ada file dipilih';
-                fileName.style.color = '#aaa';
+        // Store generated images data
+        let generatedImages = [];
+        let pointsData = [];
+        
+        // Parse multi-input text to extract points
+        function parseMultiInput() {
+            const text = multiInput.value.trim();
+            if (!text) {
+                alert('Silakan masukkan poin-poin terlebih dahulu!');
+                return [];
+            }
+            
+            const lines = text.split('\n');
+            const points = [];
+            let currentPoint = null;
+            
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line) return;
+                
+                // Check if line starts with number and dot (e.g., "1. ", "2. ")
+                const pointMatch = line.match(/^(\d+)\.\s+(.+)$/);
+                
+                if (pointMatch) {
+                    // Save previous point if exists
+                    if (currentPoint) {
+                        points.push(currentPoint);
+                    }
+                    
+                    // Start new point
+                    currentPoint = {
+                        number: parseInt(pointMatch[1]),
+                        title: pointMatch[2].trim(),
+                        description: ''
+                    };
+                } else if (currentPoint) {
+                    // Add to description
+                    currentPoint.description += (currentPoint.description ? '\n' : '') + line;
+                }
+            });
+            
+            // Add the last point
+            if (currentPoint) {
+                points.push(currentPoint);
+            }
+            
+            return points;
+        }
+        
+        // Create image input fields based on number of points
+        function createImageInputs(points) {
+            imageInputsContainer.innerHTML = '';
+            pointsData = points;
+            
+            points.forEach((point, index) => {
+                const inputGroup = document.createElement('div');
+                inputGroup.className = 'image-input-group';
+                
+                inputGroup.innerHTML = `
+                    <h3>Point ${point.number}: ${point.title.substring(0, 50)}${point.title.length > 50 ? '...' : ''}</h3>
+                    <div class="point-indicator">
+                        <span class="point-number">Point ${point.number}</span>
+                        <span>${point.title.substring(0, 30)}${point.title.length > 30 ? '...' : ''}</span>
+                    </div>
+                    <div class="file-input-container">
+                        <label class="file-input-btn" for="imageInput${point.number}">Pilih Gambar untuk Point ${point.number}</label>
+                        <input type="file" id="imageInput${point.number}" class="file-input" accept="image/*" data-point="${point.number}">
+                    </div>
+                    <div class="file-name" id="fileName${point.number}">Belum ada file dipilih</div>
+                `;
+                
+                imageInputsContainer.appendChild(inputGroup);
+                
+                // Add event listener for file input
+                const fileInput = document.getElementById(`imageInput${point.number}`);
+                const fileNameDisplay = document.getElementById(`fileName${point.number}`);
+                
+                fileInput.addEventListener('change', function() {
+                    if (this.files && this.files[0]) {
+                        fileNameDisplay.textContent = this.files[0].name;
+                        fileNameDisplay.style.color = '#4cc9f0';
+                    } else {
+                        fileNameDisplay.textContent = 'Belum ada file dipilih';
+                        fileNameDisplay.style.color = '#aaa';
+                    }
+                });
+            });
+        }
+        
+        // Update image inputs when multi-input changes
+        multiInput.addEventListener('input', function() {
+            const points = parseMultiInput();
+            if (points.length > 0) {
+                createImageInputs(points);
             }
         });
         
-        // Fungsi untuk membuat gambar dengan teks overlay
-        submitBtn.addEventListener('click', function() {
-            const judul = judulInput.value.trim();
-            const deskripsi = deskripsiInput.value.trim();
-            const imageFile = imageUpload.files[0];
-            const fontSize = parseInt(textSize.value) || 18;
-            
-            if (!deskripsi) {
-                alert('Silakan masukkan deskripsi terlebih dahulu!');
-                deskripsiInput.focus();
-                return;
-            }
-            
-            if (!imageFile) {
-                alert('Silakan pilih gambar terlebih dahulu!');
-                return;
-            }
-            
-            // Tampilkan loading
-            submitBtn.textContent = 'Memproses...';
-            submitBtn.disabled = true;
-            
-            // Buat gambar dengan teks overlay
-            createImageWithTextOverlay(imageFile, judul, deskripsi, fontSize);
-        });
-        
-        // Fungsi untuk wrap teks dengan justify
+        // Draw justified text
         function drawJustifiedText(ctx, text, x, y, width, fontSize) {
             const words = text.split(' ');
             let line = '';
@@ -349,7 +498,6 @@
                 const metrics = ctx.measureText(testLine);
                 
                 if (metrics.width > width && i > 0) {
-                    // Gambar baris dengan justify
                     drawJustifiedLine(ctx, line.trim(), x, currentY, width);
                     line = words[i] + ' ';
                     currentY += lineHeight;
@@ -358,30 +506,24 @@
                 }
             }
             
-            // Gambar baris terakhir (rata kiri)
             ctx.fillText(line.trim(), x, currentY);
         }
         
-        // Fungsi untuk menggambar satu baris dengan justify
         function drawJustifiedLine(ctx, text, x, y, width) {
             const words = text.split(' ');
-            
             if (words.length === 1) {
                 ctx.fillText(text, x, y);
                 return;
             }
             
-            // Hitung lebar teks tanpa spasi
             let textWidth = 0;
             for (let word of words) {
                 textWidth += ctx.measureText(word).width;
             }
             
-            // Hitung spasi yang dibutuhkan
             const totalSpacing = width - textWidth;
             const spaceWidth = totalSpacing / (words.length - 1);
             
-            // Gambar setiap kata dengan spasi yang disesuaikan
             let currentX = x;
             for (let i = 0; i < words.length; i++) {
                 ctx.fillText(words[i], currentX, y);
@@ -389,141 +531,319 @@
             }
         }
         
-        // Fungsi untuk membuat gambar dengan teks overlay di bagian bawah
-        function createImageWithTextOverlay(imageFile, judul, deskripsi, fontSize) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                const img = new Image();
+        // Create single image with overlay
+        function createSingleImage(point, imageFile, index, total) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
                 
-                img.onload = function() {
-                    // Atur ukuran canvas sesuai dengan gambar
-                    resultCanvas.width = img.width;
-                    resultCanvas.height = img.height;
+                reader.onload = function(e) {
+                    const img = new Image();
                     
-                    const ctx = resultCanvas.getContext('2d');
-                    
-                    // Gambar gambar asli ke canvas
-                    ctx.drawImage(img, 0, 0, img.width, img.height);
-                    
-                    // OVERLAY PUTIH DI PERBESAR: 35% (dari 30%)
-                    const overlayHeight = img.height * 0.35;
-                    const overlayY = img.height - overlayHeight;
-                    
-                    // Gambar overlay putih untuk deskripsi
-                    ctx.fillStyle = 'white';
-                    ctx.fillRect(0, overlayY, img.width, overlayHeight);
-                    
-                    // Garis pemisah di atas overlay
-                    ctx.fillStyle = '#4361ee';
-                    ctx.fillRect(0, overlayY, img.width, 3);
-                    
-                    // OVERLAY JUDUL (mentok kiri, 50% di gambar, 50% di overlay putih)
-                    if (judul) {
-                        // Ukuran teks judul tetap 18px
-                        const judulFontSize = 18;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = FIXED_WIDTH;
+                        canvas.height = FIXED_HEIGHT;
+                        const ctx = canvas.getContext('2d');
                         
-                        // Ukuran font untuk judul
-                        ctx.font = `bold ${judulFontSize}px Arial`;
+                        // Draw original image (cover)
+                        const canvasRatio = FIXED_WIDTH / FIXED_HEIGHT;
+                        const imgRatio = img.width / img.height;
                         
-                        // PADDING DIPERBESAR: kiri kanan 20px, atas bawah 15px (dari 12px & 8px)
-                        const judulPaddingLR = 20;
-                        const judulPaddingTB = 15;
-                        const judulTextWidth = ctx.measureText(judul).width;
-                        const judulBoxHeight = judulFontSize + (judulPaddingTB * 2);
+                        let drawWidth, drawHeight, offsetX, offsetY;
                         
-                        // Posisi Y: tepat di batas antara gambar dan overlay putih
-                        const judulY = overlayY;
+                        if (imgRatio > canvasRatio) {
+                            drawHeight = FIXED_HEIGHT;
+                            drawWidth = img.width * (FIXED_HEIGHT / img.height);
+                            offsetX = (FIXED_WIDTH - drawWidth) / 2;
+                            offsetY = 0;
+                        } else {
+                            drawWidth = FIXED_WIDTH;
+                            drawHeight = img.height * (FIXED_WIDTH / img.width);
+                            offsetX = 0;
+                            offsetY = (FIXED_HEIGHT - drawHeight) / 2;
+                        }
                         
-                        // POSISI X: MENTOK KIRI (0px)
-                        const judulX = 0;
+                        ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
                         
-                        // Gambar overlay hitam untuk judul (hanya seukuran teks + padding)
-                        // 50% di atas garis, 50% di bawah garis
-                        const halfHeight = judulBoxHeight / 2;
+                        // White overlay for description (35% of height)
+                        const overlayHeight = FIXED_HEIGHT * 0.35;
+                        const overlayY = FIXED_HEIGHT - overlayHeight;
+                        
+                        ctx.fillStyle = 'white';
+                        ctx.fillRect(0, overlayY, FIXED_WIDTH, overlayHeight);
+                        
+                        // Separator line
+                        ctx.fillStyle = '#4361ee';
+                        ctx.fillRect(0, overlayY, FIXED_WIDTH, 3);
+                        
+                        // Title overlay (black)
+                        const titleFontSize = 50;
+                        ctx.font = `bold ${titleFontSize}px Arial`;
+                        
+                        const titlePaddingLR = 30;
+                        const titlePaddingTB = 25;
+                        const titleTextWidth = ctx.measureText(point.title).width;
+                        const titleBoxHeight = titleFontSize + (titlePaddingTB * 2);
+                        
+                        const titleY = overlayY;
+                        const titleX = 0;
+                        
+                        const halfHeight = titleBoxHeight / 2;
                         
                         ctx.fillStyle = 'black';
                         ctx.fillRect(
-                            judulX, // MENTOK KIRI
-                            judulY - halfHeight, // Mulai dari setengah tinggi di atas garis
-                            judulTextWidth + (judulPaddingLR * 2), 
-                            judulBoxHeight
+                            titleX,
+                            titleY - halfHeight,
+                            Math.min(titleTextWidth + (titlePaddingLR * 2), FIXED_WIDTH * 0.75),
+                            titleBoxHeight
                         );
                         
-                        // Teks judul (putih) - di tengah vertikal overlay hitam
+                        // Title text (white)
                         ctx.fillStyle = 'white';
                         ctx.textBaseline = 'middle';
                         ctx.textAlign = 'left';
                         
-                        const judulTextX = judulX + judulPaddingLR; // MENTOK KIRI + padding
-                        const judulTextY = judulY; // Tepat di tengad overlay hitam
+                        const titleTextX = titleX + titlePaddingLR;
+                        const titleTextY = titleY;
                         
-                        ctx.fillText(judul, judulTextX, judulTextY);
-                    }
-                    
-                    // TEKS DESKRIPSI
-                    ctx.fillStyle = 'black';
-                    ctx.font = `bold ${fontSize}px Arial`;
-                    ctx.textBaseline = 'top';
-                    ctx.textAlign = 'left';
-                    
-                    // Padding untuk teks deskripsi
-                    const paddingLeftRight = 25;
-                    const paddingTop = 45; // Tetap agak besar karena overlay putih lebih tinggi
-                    const textX = paddingLeftRight;
-                    const textY = overlayY + paddingTop;
-                    const maxWidth = img.width - (paddingLeftRight * 2);
-                    
-                    // Gambar teks deskripsi dengan justify dan multiple lines
-                    const lines = deskripsi.split('\n');
-                    let currentY = textY;
-                    
-                    for (let line of lines) {
-                        if (line.trim() === '') continue;
+                        let displayTitle = point.title;
+                        const maxTitleWidth = FIXED_WIDTH * 0.75 - (titlePaddingLR * 2);
                         
-                        drawJustifiedText(ctx, line.trim(), textX, currentY, maxWidth, fontSize);
-                        currentY += fontSize * 1.6;
-                        
-                        // Cek apakah masih dalam area overlay
-                        if (currentY > overlayY + overlayHeight - paddingLeftRight) {
-                            break;
+                        if (ctx.measureText(displayTitle).width > maxTitleWidth) {
+                            while (ctx.measureText(displayTitle + '...').width > maxTitleWidth && displayTitle.length > 3) {
+                                displayTitle = displayTitle.substring(0, displayTitle.length - 1);
+                            }
+                            displayTitle = displayTitle + '...';
                         }
-                    }
+                        
+                        ctx.fillText(displayTitle, titleTextX, titleTextY);
+                        
+                        // Description text
+                        const descFontSize = 40; // Fixed size for description
+                        ctx.fillStyle = 'black';
+                        ctx.font = `bold ${descFontSize}px Arial`;
+                        ctx.textBaseline = 'top';
+                        ctx.textAlign = 'left';
+                        
+                        const paddingLeftRight = 50;
+                        const paddingTop = 90;
+                        const textX = paddingLeftRight;
+                        const textY = overlayY + paddingTop;
+                        const maxWidth = FIXED_WIDTH - (paddingLeftRight * 2);
+                        
+                        // Draw description with line breaks
+                        const lines = point.description.split('\n');
+                        let currentY = textY;
+                        
+                        for (let line of lines) {
+                            if (line.trim() === '') continue;
+                            
+                            drawJustifiedText(ctx, line.trim(), textX, currentY, maxWidth, descFontSize);
+                            currentY += descFontSize * 1.6;
+                            
+                            if (currentY > overlayY + overlayHeight - paddingLeftRight) {
+                                break;
+                            }
+                        }
+                        
+                        // Update progress
+                        const progress = ((index + 1) / total) * 100;
+                        progressFill.style.width = `${progress}%`;
+                        
+                        // Add to generated images
+                        const imageData = {
+                            pointNumber: point.number,
+                            title: point.title,
+                            canvas: canvas,
+                            dataURL: canvas.toDataURL('image/png'),
+                            fileName: `point-${point.number}-${point.title.substring(0, 20).replace(/[^a-z0-9]/gi, '-').toLowerCase()}.png`
+                        };
+                        
+                        generatedImages.push(imageData);
+                        
+                        // Create preview card
+                        createPreviewCard(imageData, index);
+                        
+                        resolve(imageData);
+                    };
                     
-                    // Tampilkan canvas dan sembunyikan placeholder
-                    resultCanvas.style.display = 'block';
-                    placeholder.style.display = 'none';
-                    
-                    // Simpan gambar untuk diunduh nanti
-                    generatedImage = resultCanvas.toDataURL('image/png');
-                    
-                    // Tampilkan tombol unduh
-                    downloadBtn.style.display = 'block';
-                    
-                    // Kembalikan tombol ke keadaan semula
-                    submitBtn.textContent = 'Buat Gambar dengan Teks';
-                    submitBtn.disabled = false;
+                    img.src = e.target.result;
                 };
                 
-                img.src = e.target.result;
-            };
-            
-            reader.readAsDataURL(imageFile);
+                reader.onerror = reject;
+                reader.readAsDataURL(imageFile);
+            });
         }
         
-        // Fungsi untuk mengunduh gambar
-        downloadBtn.addEventListener('click', function() {
-            if (!generatedImage) {
-                alert('Tidak ada gambar untuk diunduh. Silakan buat gambar terlebih dahulu.');
+        // Create preview card for generated image
+        function createPreviewCard(imageData, index) {
+            // Remove placeholder if exists
+            const placeholder = previewContainer.querySelector('.placeholder');
+            if (placeholder) {
+                placeholder.remove();
+            }
+            
+            const card = document.createElement('div');
+            card.className = 'image-card';
+            card.id = `previewCard${imageData.pointNumber}`;
+            
+            const canvas = document.createElement('canvas');
+            canvas.className = 'card-canvas';
+            canvas.width = 300;
+            canvas.height = 375;
+            
+            // Draw scaled down version
+            const ctx = canvas.getContext('2d');
+            const tempCanvas = imageData.canvas;
+            
+            // Scale down for preview
+            ctx.drawImage(tempCanvas, 0, 0, 300, 375);
+            
+            card.innerHTML = `
+                <div class="card-header">Point ${imageData.pointNumber}: ${imageData.title.substring(0, 30)}${imageData.title.length > 30 ? '...' : ''}</div>
+                <canvas class="card-canvas" id="previewCanvas${imageData.pointNumber}"></canvas>
+                <div class="card-actions">
+                    <button class="btn-download-single" onclick="downloadSingleImage(${index})">Download</button>
+                    <button class="btn-download-single" onclick="viewFullImage(${index})" style="background: #f72585;">View Full</button>
+                </div>
+            `;
+            
+            // Replace the canvas with our drawn one
+            const cardCanvas = card.querySelector(`#previewCanvas${imageData.pointNumber}`);
+            cardCanvas.parentNode.replaceChild(canvas, cardCanvas);
+            
+            previewContainer.appendChild(card);
+        }
+        
+        // Generate all images
+        submitBtn.addEventListener('click', async function() {
+            const points = parseMultiInput();
+            
+            if (points.length === 0) {
+                alert('Silakan masukkan poin-poin terlebih dahulu!');
                 return;
             }
             
-            // Buat tautan unduhan
+            // Check if all images are uploaded
+            let allImagesUploaded = true;
+            const imageFiles = [];
+            
+            for (const point of points) {
+                const fileInput = document.getElementById(`imageInput${point.number}`);
+                if (!fileInput || !fileInput.files[0]) {
+                    allImagesUploaded = false;
+                    alert(`Silakan upload gambar untuk Point ${point.number}: ${point.title}`);
+                    break;
+                }
+                imageFiles.push(fileInput.files[0]);
+            }
+            
+            if (!allImagesUploaded) return;
+            
+            // Reset
+            generatedImages = [];
+            previewContainer.innerHTML = '<div class="image-card placeholder"><div class="card-header">Generating images...</div><div style="padding: 50px; text-align: center; color: #888;"><div style="font-size: 3rem; margin-bottom: 15px;">⏳</div><p>Generating images, please wait...</p></div></div>';
+            
+            // Show progress
+            progressBar.style.display = 'block';
+            progressFill.style.width = '0%';
+            statusMessage.style.display = 'block';
+            statusMessage.textContent = 'Memulai proses generate gambar...';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+            
+            try {
+                // Process each image sequentially
+                for (let i = 0; i < points.length; i++) {
+                    statusMessage.textContent = `Processing Point ${points[i].number} of ${points.length}...`;
+                    
+                    await createSingleImage(points[i], imageFiles[i], i, points.length);
+                    
+                    // Small delay to show progress
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+                // Complete
+                statusMessage.textContent = `✅ Berhasil generate ${points.length} gambar!`;
+                statusMessage.style.background = 'rgba(76, 201, 240, 0.2)';
+                downloadAllBtn.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error generating images:', error);
+                statusMessage.textContent = '❌ Error generating images. Please try again.';
+                statusMessage.style.background = 'rgba(247, 37, 133, 0.2)';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Generate All Images';
+            }
+        });
+        
+        // Download single image
+        function downloadSingleImage(index) {
+            if (!generatedImages[index]) return;
+            
             const link = document.createElement('a');
-            link.download = 'gambar-dengan-teks.png';
-            link.href = generatedImage;
+            link.download = generatedImages[index].fileName;
+            link.href = generatedImages[index].dataURL;
             link.click();
+        }
+        
+        // View full image in new tab
+        function viewFullImage(index) {
+            if (!generatedImages[index]) return;
+            
+            const win = window.open();
+            win.document.write(`<img src="${generatedImages[index].dataURL}" style="max-width: 100%; height: auto;" />`);
+        }
+        
+        // Download all images as ZIP
+        downloadAllBtn.addEventListener('click', async function() {
+            if (generatedImages.length === 0) {
+                alert('No images to download. Please generate images first.');
+                return;
+            }
+            
+            statusMessage.textContent = '📦 Creating ZIP file...';
+            statusMessage.style.background = 'rgba(67, 97, 238, 0.2)';
+            downloadAllBtn.disabled = true;
+            downloadAllBtn.textContent = 'Creating ZIP...';
+            
+            try {
+                const zip = new JSZip();
+                
+                // Add each image to zip
+                generatedImages.forEach((image, index) => {
+                    // Convert dataURL to blob
+                    const data = image.dataURL.split(',')[1];
+                    zip.file(image.fileName, data, {base64: true});
+                });
+                
+                // Generate zip file
+                const content = await zip.generateAsync({type: "blob"});
+                
+                // Download zip
+                saveAs(content, `points-images-${new Date().toISOString().split('T')[0]}.zip`);
+                
+                statusMessage.textContent = '✅ ZIP file downloaded!';
+                downloadAllBtn.textContent = 'Download All Images (ZIP)';
+                
+            } catch (error) {
+                console.error('Error creating ZIP:', error);
+                statusMessage.textContent = '❌ Error creating ZIP file.';
+                statusMessage.style.background = 'rgba(247, 37, 133, 0.2)';
+            } finally {
+                downloadAllBtn.disabled = false;
+            }
+        });
+        
+        // Initialize with example data
+        window.addEventListener('DOMContentLoaded', function() {
+            // Parse the example text to create initial inputs
+            const points = parseMultiInput();
+            if (points.length > 0) {
+                createImageInputs(points);
+            }
         });
     </script>
 </body>
-</html> 
+</html>
